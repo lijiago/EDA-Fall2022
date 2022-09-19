@@ -38,10 +38,10 @@ hundredseq # print result
 
 #2. 
 
-hundredseq_mean <- mean(hundredseq) # computing the mean of the sequence using the mean function
+hundredseq_mean <- mean(hundredseq) # computing the mean of the sequence using the mean function and assigning a name to the result
 hundredseq_mean # print result
 
-hundredseq_median <- median(hundredseq) # computing the median of the sequence using the median function
+hundredseq_median <- median(hundredseq) # computing the median of the sequence using the median function and assigning a name to the result
 hundredseq_median # print result
 
 
@@ -110,8 +110,8 @@ df_classtestscores
 
 passfifty<- function(x) {
 ifelse(x >50, "TRUE", "FALSE")
-
 }
+
 x <- student_scores
 passfifty(x)
 

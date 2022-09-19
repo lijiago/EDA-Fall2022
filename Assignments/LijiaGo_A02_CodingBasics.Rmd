@@ -6,11 +6,6 @@ geometry: margin=2.54cm
 editor_options: 
   chunk_output_type: console
 ---
-## Tidy pdf on knit
-```{r}
-library(knitr)
-opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
-```
 
 ## OVERVIEW
 

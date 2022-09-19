@@ -6,6 +6,11 @@ geometry: margin=2.54cm
 editor_options: 
   chunk_output_type: console
 ---
+## Tidy pdf on knit
+```{r}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
 
 ## OVERVIEW
 
@@ -121,4 +126,6 @@ print(answer) #print result
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer: Only 'ifelse' worked. The if() statement can only check one element in a vector at a time, but by using 'ifelse', we can attempt to check every element in the vector at once.
+> Answer: Only 'ifelse' worked. The if() statement can only work with elements that are length 1, i.e. a single name. However, by using the 'ifelse' expression, we are able to check if the entire class of students passed the test at once. 
+
+

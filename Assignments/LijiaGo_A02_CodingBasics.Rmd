@@ -30,7 +30,7 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 
 4.  Insert comments in your code to describe what you are doing.
 
-```{r}
+```{r generating a sequence}
 #1. 
 seq(1,100,4) # using sequence function to generate sequance of numbers from 1 to 100 increasing by fours. i.e. seq (from, to, by)
 hundredseq <- seq(1,100,4) # generating sequence from 1 to 100, increasing by 4. naming sequence 'hundredseq'
@@ -63,16 +63,16 @@ hundredseq_mean != hundredseq_median # asking R if mean and median are not equal
 
 8.  Label the columns of your data frame with informative titles.
 
-```{r}
+```{r creating vectors}
 #5. 
-student_names <- c ("John", "Peter", "Sarah", "Jill")
-student_names
+student_names <- c ("John", "Peter", "Sarah", "Jill") #creating a vector of student names
+student_names #print result
 
-student_scores <- c(80, 90, 40, 48)
-student_scores
+student_scores <- c(80, 90, 40, 48) #creating a vector of student's scores
+student_scores #print result
 
-student_pass <- c(TRUE, TRUE, FALSE, FALSE)
-student_pass
+student_pass <- c(TRUE, TRUE, FALSE, FALSE) 
+student_pass #print result
 
 #6. 
 class(student_names) #character
@@ -82,18 +82,18 @@ class(student_scores) #numeric
 class(student_pass) #logical
 
 #7.
-df_classnames <- as.data.frame(student_names)
-df_classscores <- as.data.frame(student_scores)
-df_classpass <- as.data.frame(student_pass)
+df_classnames <- as.data.frame(student_names) # transforming vector into a data frame
+df_classscores <- as.data.frame(student_scores)# transforming vector into a data frame
+df_classpass <- as.data.frame(student_pass)# transforming vector into a data frame
 
-df_classtestscores <- cbind(df_classnames, df_classscores, df_classpass)
-class(df_classtestscores) 
-df_classtestscores
+df_classtestscores <- cbind(df_classnames, df_classscores, df_classpass) # combining all the columns of the data frame
+df_classtestscores #print result
 
 
 #8.
 colnames(df_classtestscores) <- c("names", "scores", "passed") # renaming names of columns of data frame
-df_classtestscores
+df_classtestscores #print result
+
 
 
 ```
@@ -105,19 +105,20 @@ df_classtestscores
 10. Create a function with an if/else statement. Your function should take a **vector** of test scores and print (not return) whether a given test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. 
 
 11. Apply your function to the vector with test scores that you created in number 5.
-```{r}
+```{r creating a function to see if given test score is a passing grade of 50 or above}
 
 
-passfifty<- function(x) {
+passfifty<- function(x) { 
 ifelse(x >50, "TRUE", "FALSE")
 }
 
-x <- student_scores
-passfifty(x)
+answer<-passfifty(student_scores)
+print(answer) #print result
+
 
 
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer:
+> Answer: Only 'ifelse' worked. The if() statement can only check one element in a vector at a time, but by using 'ifelse', we can attempt to check every element in the vector at once.

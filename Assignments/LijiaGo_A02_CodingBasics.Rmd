@@ -42,7 +42,7 @@ seq(1,100,4)
 # 'hundredseq'
 hundredseq <- seq(1,100,4)
 
-# print result
+# return result
 hundredseq 
 
 #2. 
@@ -50,13 +50,13 @@ hundredseq
 # name to the result
 hundredseq_mean <- mean(hundredseq)
 
-# print result
+# return result
 hundredseq_mean 
 
 # computing the median of the sequence using the median function and assigning a
 # name to the result
 hundredseq_median <- median(hundredseq) 
-hundredseq_median # print result
+hundredseq_median # return result
 
 
 #3. 
@@ -81,15 +81,15 @@ hundredseq_mean != hundredseq_median # asking R if mean and median are not equal
 #5. 
 #creating a vector of student names
 student_names <- c ("John", "Peter", "Sarah", "Jill") 
-student_names #print result
+student_names #return result
 
 #creating a vector of student's scores
 student_scores <- c(80, 90, 40, 48)
-student_scores #print result
+student_scores #return result
 
 #creating a vector showing whether students have passed the test or not
 student_pass <- c(TRUE, TRUE, FALSE, FALSE) 
-student_pass #print result
+student_pass #return result
 
 #6. 
 class(student_names) #character
@@ -112,7 +112,7 @@ df_classtestscores #print result
 #8.
 # renaming names of columns of data frame
 colnames(df_classtestscores) <- c("names", "scores", "passed") 
-df_classtestscores #print result
+df_classtestscores #return result
 
 
 

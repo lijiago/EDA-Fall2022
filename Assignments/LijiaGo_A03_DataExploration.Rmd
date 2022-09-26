@@ -30,6 +30,8 @@ The completed exercise is due on Sept 30th.
 #set up working directory
 getwd()
 
+setwd("/home/guest/R/EDA-Fall2022/")
+
 #load tidyverse
 library(tidyverse)
 
@@ -97,7 +99,9 @@ class_conc1author #return class of Conc.1..Author.
 
 ```
 
-> Answer: It is factor data.
+> Answer: It is factor data. In the csv file, data is separated using a comma, 
+But then I looked at my data and noticed that it is being caused due to the fact that my csv file was using a comma separator (,) in all numeric columns
+
 
 ## Explore your data graphically (Neonics)
 
@@ -129,7 +133,7 @@ Interpret this graph. What are the most common test locations, and do they diffe
 
 ```{r}
 ggplot(Neonics) +
-  geom_(aes(x=Endpoint))
+  geom_bar(aes(x=Endpoint))
 
 
 ```
@@ -141,6 +145,16 @@ ggplot(Neonics) +
 12. Determine the class of collectDate. Is it a date? If not, change to a date and confirm the new class of the variable. Using the `unique` function, determine which dates litter was sampled in August 2018.
 
 ```{r}
+class_collectDate <- class(Litter$collectDate)
+class_collectDate
+
+Litter$collectDate <- as.Date(Litter$collectDate) #transforming factor is converted to date 
+class_collectDate2 <-class(Litter$collectDate)
+class_collectDate2 #confirming collectDate was converted to date
+
+dates_sampled <- unique(Litter$collectDate) 
+dates_sampled #dates sampled were the 2nd Aug 2018 and 30th Aug 2018
+
 
 ```
 
@@ -148,26 +162,39 @@ ggplot(Neonics) +
 
 ```{r}
 
+plots_sampled <- (unique(Litter$plotID))
+plots_sampled #return a list of unique plotIDs 
+
+summary(Litter$plotID)
+
 ```
 
-> Answer:
+> Answer: There were 12 unique plots sampled at Niwot Ridge. unique() returns a list of unique plotIDs, while summary() returns a list of unique plotIDs as well as the number of times each plot was used in a study/sampled. (check this)
 
 14. Create a bar graph of functionalGroup counts. This shows you what type of litter is collected at the Niwot Ridge sites. Notice that litter types are fairly equally distributed across the Niwot Ridge sites.
 
 ```{r}
 
+ggplot(Litter, aes(x = functionalGroup)) +
+  geom_bar()
 ```
 
 15. Using `geom_boxplot` and `geom_violin`, create a boxplot and a violin plot of dryMass by functionalGroup.
 
 ```{r}
 
+ggplot(Litter) +
+  geom_boxplot(aes(x = functionalGroup, y=dryMass)) 
+
+ggplot(Litter) +
+  geom_violin(aes(x= functionalGroup, y= dryMass))
+
 ```
 
 Why is the boxplot a more effective visualization option than the violin plot in this case?
 
-> Answer:
+> Answer: An alternate option is a violin plot, which displays density distributions, somewhat like a hybrid of the box-and-whiskers and the frequency polygon plot.
 
 What type(s) of litter tend to have the highest biomass at these sites?
 
-> Answer:
+> Answer: Needs tended to have the highest biomass at these sites. 

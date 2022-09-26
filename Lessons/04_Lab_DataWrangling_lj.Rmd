@@ -142,5 +142,13 @@ NTL.irradiance.gathered <-
 
 #Exercise 6: spread temperatureC into more than one column based on the depth
 
+NTL.phys.data.Ex6 <- 
+  NTL.phys.data %>%
+  pivot_wider(
+    names_from = "depth",
+    values_from = "temperature_C"
+  )
+
+
 ```
 

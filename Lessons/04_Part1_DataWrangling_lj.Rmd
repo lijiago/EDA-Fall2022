@@ -37,7 +37,7 @@ dim(NTL.phys.data)
 
 class(NTL.phys.data$sampledate)
 # Format sampledate as date
-NTL.phys.data$sampledate <- as.Date(NTL.phys.data$sampledate, format = "%m/%d/%y")
+NTL.phys.data$sampledate <- as.Date(NTL.phys.data$sampledate, format = "%m/%d/%y") #format always in quotes
 head(NTL.phys.data$sampledate) #to check if it was converted correctly
 ```
 
@@ -79,7 +79,7 @@ class(NTL.phys.data$depth) #can only compare numerics with numerics
 # matrix filtering
 NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,] #observations can be viewed in Environment tab
 
-## how is matrix filtering different from dplyr filtering
+## how is matrix filtering different from dplyr filtering? (dplyr is more general)
 
 # dplyr filtering
 NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0)

@@ -35,6 +35,10 @@ setwd("/home/guest/R/EDA-Fall2022/")
 #load tidyverse
 library(tidyverse)
 
+#install.packages('formatR')
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80),
+                      tidy=TRUE)
+
 #load and name Neonics dataset, convert strings to factor
 Neonics <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv", stringsAsFactors=TRUE) 
 

@@ -146,18 +146,17 @@ non-numeric values in row 67 where "NR" is displayed instead of a number).
 
 9.  Using `geom_freqpoly`, generate a plot of the number of studies conducted by publication year.
 
-```{r}
+```{r message = FALSE, warning=FALSE}
+
 #generating plot of number of studies per publication year 
 ggplot(Neonics, aes(x = Publication.Year)) +
   geom_freqpoly()
 
-
-
 ```
 
 10. Reproduce the same graph but now add a color aesthetic so that different Test.Location are displayed as different colors.
-
-```{r}
+ 
+```{r message = FALSE, warning=FALSE}
 #generating plot of studies coloured by categorical data of Test.Location
 ggplot(Neonics) +
   geom_freqpoly(aes(x = Publication.Year, color=Test.Location)) 

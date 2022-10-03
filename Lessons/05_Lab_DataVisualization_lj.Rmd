@@ -43,7 +43,7 @@ The expression function can be used when you want to add mathematical symbols an
 Plot_text <-
 ggplot(data=data.frame(x=0,y=0))+
   geom_point(aes(x=x,y=y)) +
-  geom_text(x=0,y=0.025,label=expression(paste("Mean is ", mu,",", R^{2},'=0.6')))
+  geom_text(x=0,y=0.025,label=expression(paste("Mean is ", mu,",", R^{2},'=0.6'))) #use function expression when you want to write an equation. paste() is to add default elements together
 print(Plot_text)
 
 ggsave("./Output/Plot_text.jpg",Plot_text, height = 4, width = 6, units = "in", dpi = 300)
@@ -75,6 +75,23 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 # Color your points by year, and facet by lake in two rows.
 # Change the ylab name
 
+surfacetemp_day <-
+  ggplot(subset(PeterPaul.chem.nutrients, depth == 0), 
+                aes(x = daynum, y = temperature_C, color=year4)) +
+  geom_point() +
+  facet_wrap(vars(lakename), nrow = 2)
+
+  print(surfacetemp_day)
+
+
+#model answer
+  ex1 <-
+    ggplot(subset(PeterPaul.chem.nutrients, depth == 0), aes(x=daynum, y=temperature_C)) +
+    geom_point(aes(color=year4)) + 
+    facet_wrap(vars(lakename), nrow = 2) +
+    ylab("Surface Temperature") +
+    xlab("Day of year")
+  print(ex1)
 
 #2. 
 # Plot temperature by date. Color your points by depth.
@@ -82,8 +99,28 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 # Change the color palette to magma and play with direction (+- 1), which one makes more sense?
 # Change x axis to include marker/labels every 5 years
 
+  #bad example. need to put color=depth and size 0.5 within aes() of geom_point so that r knows which points you want to change the size 
+ex2 <-
+  ggplot(PeterPaul.chem.nutrients, aes(x=sampledate, y=temperature_C, color=depth) )+
+  geom_point(aes(size=0.5)) +
+  scale_color_viridis(option="magma", direction = -1) +
+  scale_x_date(
+    date_breaks = "5 years", date_labels = "%Y")
+print(ex2)
 
 
+#model ans
+
+ex2b <- 
+  ggplot(PeterPaul.chem.nutrients, aes(x=sampledate,
+                                       y=temperature_C)) +
+  geom_point(aes(color=depth), size=0.5) +
+  ylab("Temp in Celsius") +
+  scale_color_viridis(option="magma", direction = -1) +
+  scale_x_date(
+    date_breaks = "5 years", date_labels = "%Y")
+print(ex2b)
+  
 
 ```
 ## Plotting the relationship between two continuous variables: Scatterplot
@@ -97,7 +134,21 @@ Exercise: Plot relationships between air quality measurements
 # Make the points 50 % transparent
 # Add a line of best fit for the linear regression of these variables.
 
+ex3 <- 
+  ggplot(EPAair, aes(x=PM2.5,y=Ozone)) +
+  geom_point(aes(color=meanLat), alpha=0.5) +
+  geom_smooth(method = lm)
+print(ex3)
 
+
+#model answer
+ex3b <- 
+  ggplot(EPAair, aes(x=PM2.5,y=Ozone)) +
+  geom_point(aes(color=meanLat), alpha=0.5) +
+  geom_smooth(method = lm, color="red")+
+  ylab(expression("O"[3]* "AQI Value"))
+
+print(ex3b)
 
 
 ```

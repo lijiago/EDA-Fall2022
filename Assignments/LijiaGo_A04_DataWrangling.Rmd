@@ -31,12 +31,9 @@ The completed exercise is due on Friday, Oct7th @ 5:00pm.
 ## Set up your session 
 1. Check your working directory, load the `tidyverse` and `lubridate` packages, and upload all four raw data files associated with the EPA Air dataset, being sure to set string columns to be read in a factors. See the README file for the EPA air datasets for more information (especially if you have not worked with air quality data previously). 
 
-```{r}
+```{r, message=FALSE}
 #set up working directory
-
 setwd("/home/guest/R/EDA-Fall2022/")
-
-getwd()
 
 #load tidyverse
 library(tidyverse)
@@ -93,7 +90,7 @@ str(PM25_NC2019)
 5. For the PM2.5 datasets, fill all cells in AQS_PARAMETER_DESC with "PM2.5" (all cells in this column should be identical).
 6. Save all four processed datasets in the Processed folder. Use the same file names as the raw files but replace "raw" with "processed".
 
-```{r}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), message=FALSE}
 #3a changing date from factor to date for O3_NC2018
 O3_NC2018$Date <- as.Date(O3_NC2018$Date, format = "%m/%d/%Y")
 
@@ -107,34 +104,41 @@ PM25_NC2018$Date <- as.Date(PM25_NC2018$Date, format = "%m/%d/%Y")
 PM25_NC2019$Date <- as.Date(PM25_NC2019$Date, format = "%m/%d/%Y")
 
 #4a selecting relevant columns for O3_NC2018
-O3_NC2018.selectcols <- select(O3_NC2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
+O3_NC2018.selectcols <- select(O3_NC2018, Date, DAILY_AQI_VALUE, Site.Name, 
+                               AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
 
 #4b selecting relevant columns for O3_NC2019
-O3_NC2019.selectcols <- select(O3_NC2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
+O3_NC2019.selectcols <- select(O3_NC2019, Date, DAILY_AQI_VALUE, Site.Name, 
+                               AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
 
 #4c selecting relevant columns for PM25_NC2018
-PM25_2018.selectcols <- select(PM25_NC2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
+PM25_2018.selectcols <- select(PM25_NC2018, Date, DAILY_AQI_VALUE, Site.Name, 
+                               AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
 
 #4d selecting relevant columns for PM25_NC2019
-PM25_2019.selectcols <- select(PM25_NC2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
+PM25_2019.selectcols <- select(PM25_NC2019, Date, DAILY_AQI_VALUE, Site.Name, 
+                               AQS_PARAMETER_DESC, COUNTY:SITE_LONGITUDE)
 
 #5 assign cells in AQS_PARAMETER_DESC with 'PM2.5'
 PM25_2018.selectcols$AQS_PARAMETER_DESC <- 'PM2.5'
 
 PM25_2019.selectcols$AQS_PARAMETER_DESC <- 'PM2.5'
+```
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=50), message=FALSE}
 
 #6a Saving all 4 processed datasets in Processed folder
-write.csv(O3_NC2018.selectcols, row.names = FALSE, file =
-            "./Data/Processed/EPAair_O3_NC2018_processed.csv")
+write.csv(O3_NC2018.selectcols, row.names = FALSE, 
+          file ="./Data/Processed/EPAair_O3_NC2018_Processed.csv")
 
-write.csv(O3_NC2019.selectcols, row.names = FALSE, file =
-            "./Data/Processed/EPAair_O3_NC2019_processed.csv")
+write.csv(O3_NC2019.selectcols, row.names = FALSE, 
+          file ="./Data/Processed/EPAair_O3_NC2019_Processed.csv")
 
-write.csv(PM25_2018.selectcols, row.names = FALSE, file =
-            "./Data/Processed/EPAair_PM25_NC2018_processed.csv")
+write.csv(PM25_2018.selectcols, row.names = FALSE, 
+          file ="./Data/Processed/EPAair_PM25_NC2018_Processed.csv")
 
-write.csv(PM25_2019.selectcols, row.names = FALSE, file =
-            "./Data/Processed/EPAair_PM25_NC2019_processed.csv")
+write.csv(PM25_2019.selectcols, row.names = FALSE, 
+          file ="./Data/Processed/EPAair_PM25_NC2019_Processed.csv")
 ```
 
 ## Combine datasets
@@ -150,7 +154,7 @@ write.csv(PM25_2019.selectcols, row.names = FALSE, file =
 10. Call up the dimensions of your new tidy dataset.
 11. Save your processed dataset with the following file name: "EPAair_O3_PM25_NC1718_Processed.csv"
 
-```{r}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), message=FALSE}
 
 #7 combining all 4 datasets
 EPA_AirQuality <- rbind(O3_NC2018.selectcols, O3_NC2019.selectcols, PM25_2018.selectcols, PM25_2019.selectcols)
@@ -165,12 +169,17 @@ EPA_AirQuality.processed <-
             meanLONG=mean(SITE_LONGITUDE)) %>%
   mutate(Year = lubridate::year(Date),
          Month = lubridate::month(Date))
-        
-#9
+    
+#9 Spread dataset so Ozone and PM2.5 AQI values have their own columns
+EPA_AirQuality.processed.spread <-
+  pivot_wider(EPA_AirQuality.processed, names_from = AQS_PARAMETER_DESC, values_from = meanAQI)
+  
+#10 call dimensions of new dataset
+dim(EPA_AirQuality.processed.spread)
 
-#10
-
-#11
+#11 saving the new tidy dataset
+write.csv(EPA_AirQuality.processed.spread, row.names = FALSE, 
+          file ="./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv")
 
 ```
 
@@ -180,15 +189,22 @@ EPA_AirQuality.processed <-
 
 13. Call up the dimensions of the summary dataset.
 
-```{r}
-#12a
+```{r, message=FALSE}
+#12 using split-apply-combine strategy and pipe function to satisfy aforementioned criteria 
+EPA_AirQuality.summary <- 
+  EPA_AirQuality.processed.spread %>%
+  group_by(Site.Name, Year, Month) %>%
+  summarize(meanAQIPM2.5=mean(PM2.5),
+            meanAQIO3=mean(Ozone)) %>%
+  drop_na(meanAQIO3, meanAQIPM2.5)
 
-#12b
+#13 calling dimensions of new summary dataset
+dim(EPA_AirQuality.summary)
 
-#13
+
 
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
 
-> Answer: 
+> Answer: drop_na() allows us to select which columns of data to remove the NA from, while na.omit() will automatically drop rows with NA in any column of the dataframe. 

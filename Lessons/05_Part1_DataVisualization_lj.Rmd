@@ -106,7 +106,6 @@ print(PMplot)
 
 # Separate plot with facets
 PMplot.faceted <-
-  ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(Year))) +
   geom_point() +
   facet_wrap(vars(Site.Name), nrow = 3) #create 1 plot for each site, instead of colouring each site by diff colours
 print(PMplot.faceted)

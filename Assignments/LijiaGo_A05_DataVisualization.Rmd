@@ -119,6 +119,7 @@ see <https://r-lang.com/month-abb-in-r-with-example>
 Temp.monthplot <- 
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = temperature_C, color=lakename)) +
   geom_boxplot() + 
+  ylim(0,30) +
   scale_x_discrete (drop=FALSE) +
   labs(x="Month", y="Temperature (°C)", color="Lake Name") 
 
@@ -128,6 +129,7 @@ print(Temp.monthplot)
 TP.monthplot <- 
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tp_ug, color=lakename)) +
   geom_boxplot() + 
+  ylim(0,160) +
   scale_x_discrete(drop=FALSE) +
   labs(x="Month", y="Total Phosphorous (ug)", color="Lake Name")
 
@@ -137,6 +139,7 @@ print(TP.monthplot)
 TN.monthplot <- 
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tn_ug, color=lakename)) +
   geom_boxplot() + 
+  ylim(0,3500) +
   scale_x_discrete(drop=FALSE) +
   labs(x="Month", y="Total Nitrogen (ug)", color="Lake Name")
 
@@ -204,4 +207,4 @@ print(NeedleDryMass.Date.Faceted)
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer:7 is more effective. 
+> Answer: 6 is more effective. While we are able to see the dry mass ranges for each NLCD class more clearly on plot 7, for comparison between dry weights of the different classes, plot 6 is more effective as the data points are all on the same axis. 

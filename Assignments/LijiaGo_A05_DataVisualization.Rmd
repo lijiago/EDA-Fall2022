@@ -3,6 +3,8 @@ title: "Assignment 5: Data Visualization"
 author: "Li Jia Go"
 output: pdf_document
 geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -57,18 +59,26 @@ NiwotRidge <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.cs
                    stringsAsFactors=TRUE)
 
 #2 
-#format sample date as date 
+#read dates as date for both datasets 
 PeterPaul$sampledate <- as.Date(PeterPaul$sampledate)
+PeterPaul$month <- as.factor(PeterPaul$month)
 
-NiwotRidge %>% as.Date('weighDate,'setDate')
-  
+NiwotRidge$weighDate <- as.Date(NiwotRidge$weighDate)
+NiwotRidge$setDate <- as.Date(NiwotRidge$setDate)
+NiwotRidge$collectDate <- as.Date(NiwotRidge$collectDate) 
+NiwotRidge$ovenStartDate <- as.Date(NiwotRidge$ovenStartDate)
+NiwotRidge$ovenEndDate <- as.Date(NiwotRidge$ovenEndDate)
 
 ```
 ## Define your theme
 3. Build a theme and set it as your default theme.
 
 ```{r}
-#3
+#3 building and setting a default theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+theme_set(mytheme)
 
 ```
 
@@ -83,7 +93,15 @@ color it black. Adjust your axes to hide extreme values (hint: change the
 limits using `xlim()` and/or `ylim()`).
 
 ```{r}
-#4
+#4 
+TPvPO4<-
+  ggplot(PeterPaul, aes(x = po4, y = tp_ug, color=lakename)) + 
+  geom_point() +
+  geom_smooth(method = lm, color="black") +
+  labs(x = "Phosphate", y = "Total Phosphorous") +
+  xlim(0,30) +
+  ylim(0,100)
+print(TPvPO4)
 
 ```
 
@@ -97,14 +115,62 @@ Tip: R has a build in variable called `month.abb` that returns a list of months;
 see <https://r-lang.com/month-abb-in-r-with-example>
 
 ```{r}
-#5
+#5(a) Temperature vs month boxplot. 
+Temp.monthplot <- 
+  ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = temperature_C, color=lakename)) +
+  geom_boxplot() + 
+  scale_x_discrete (drop=FALSE) +
+  labs(x="Month", y="Temperature (°C)", color="Lake Name") 
+
+print(Temp.monthplot)
+
+#5(b) 
+TP.monthplot <- 
+  ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tp_ug, color=lakename)) +
+  geom_boxplot() + 
+  scale_x_discrete(drop=FALSE) +
+  labs(x="Month", y="Total Phosphorous (ug)", color="Lake Name")
+
+print(TP.monthplot)
+
+#5(c)
+TN.monthplot <- 
+  ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tn_ug, color=lakename)) +
+  geom_boxplot() + 
+  scale_x_discrete(drop=FALSE) +
+  labs(x="Month", y="Total Nitrogen (ug)", color="Lake Name")
+
+print(TN.monthplot)
+
+#5(d) creating all 3 plots without legends
+Temp.monthplot.NL <- 
+  Temp.monthplot + theme(legend.position = "none") 
+
+TP.monthplot.NL <-
+  TP.monthplot + theme(legend.position = "none")
+
+TN.monthplot.NL <-
+  TN.monthplot + theme(legend.position = "none")
+
+#combining all 3 plots with no legend and assigning them to a new object
+combinedplots <- plot_grid(Temp.monthplot.NL, TP.monthplot.NL, TN.monthplot.NL, nrow=1, align= 'h', rel_heights=c(1.25,1))
+print(combinedplots)
+
+#extracting the legend from original temperature plot (with legend)
+legend <- get_legend(
+  Temp.monthplot + 
+    guides(color = guide_legend(nrow=1))
+)
+#cowplot combining all 3 plots with one single legend 
+plot_grid(combinedplots, legend,ncol=1,rel_heights = c(1, 0.1))
 
 ```
 
 Question: What do you observe about the variables of interest over seasons 
 and between lakes? 
 
-> Answer: 
+> Answer: Generally, we see wide temperature ranges for both lakes across all the months, though the median temperatures seem to increase from late Spring to Summer and decrease from summer to Spring. 
+Of the 2 lakes, it seems that Peter Lake is more eutrophic than Paul Lake, having higher median TP and TN values as compared to Paul Lake for all the months where there are observations. Furthermore, the outliers for Peter Lake seem to hit much higher values as compared to Paul Lake for both nutrients. The median TN values for both lakes seem to remain relatively constant across Spring, Summer and early Fall, although we see a slight increase in the TN range and median value for Peter Lake in August. For TP, median values for Paul Lake remains relatively constant throughout the seasons, while median values for Peter Lake seem to rise from Spring to Summer and early Fall, with the highest values of TP recorded in the height of summer (July).  
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the 
 "Needles" functional group. Plot the dry mass of needle litter by date and 
@@ -116,11 +182,26 @@ three facets rather than separated by color.
 
 ```{r}
 #6
+NeedleDryMass.Date <- 
+  ggplot(subset(NiwotRidge, functionalGroup == "Needles"),
+         aes(x=collectDate, y=dryMass, color=nlcdClass)) +
+  geom_point() +
+  labs(x="Collection Date", y="Dry Mass (g)", color="NLCD Class")
+                
+print(NeedleDryMass.Date)
 
-#7
 
+#7 
+NeedleDryMass.Date.Faceted <-
+  ggplot(subset(NiwotRidge, functionalGroup == "Needles"),
+         aes(x=collectDate, y=dryMass)) +
+  geom_point() +
+  labs(x="Collection Date", y="Dry Mass (g)", color="NLCD Class") +
+  facet_wrap(vars(nlcdClass), nrow = 3)
+
+print(NeedleDryMass.Date.Faceted)
 
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer:
+> Answer:7 is more effective. 

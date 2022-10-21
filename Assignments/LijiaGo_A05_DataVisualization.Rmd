@@ -40,7 +40,7 @@ the processed data file for the Niwot Ridge litter dataset (use the
 
 2. Make sure R is reading dates as date format; if not change the format to date.
 
-```{r}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=30), message=FALSE}
 #1  
 
 #set up working directory
@@ -52,7 +52,8 @@ library(lubridate)
 library(cowplot)
 
 #load and name PeterPaul dataset, convert strings to factor
-PeterPaul <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", stringsAsFactors = TRUE) 
+PeterPaul <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", 
+                      stringsAsFactors = TRUE) 
 
 #load and name Niwot Ridge litter dataset, convert strings to factor
 NiwotRidge <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv", 
@@ -63,11 +64,7 @@ NiwotRidge <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.cs
 PeterPaul$sampledate <- as.Date(PeterPaul$sampledate)
 PeterPaul$month <- as.factor(PeterPaul$month)
 
-NiwotRidge$weighDate <- as.Date(NiwotRidge$weighDate)
-NiwotRidge$setDate <- as.Date(NiwotRidge$setDate)
 NiwotRidge$collectDate <- as.Date(NiwotRidge$collectDate) 
-NiwotRidge$ovenStartDate <- as.Date(NiwotRidge$ovenStartDate)
-NiwotRidge$ovenEndDate <- as.Date(NiwotRidge$ovenEndDate)
 
 ```
 ## Define your theme
@@ -92,13 +89,13 @@ separate aesthetics for Peter and Paul lakes. Add a line of best fit and
 color it black. Adjust your axes to hide extreme values (hint: change the 
 limits using `xlim()` and/or `ylim()`).
 
-```{r}
-#4 
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), message=FALSE, warning=FALSE}
+#4 TP vs PO4 plot, with line of best fit in black
 TPvPO4<-
   ggplot(PeterPaul, aes(x = po4, y = tp_ug, color=lakename)) + 
   geom_point() +
-  geom_smooth(method = lm, color="black") +
-  labs(x = "Phosphate", y = "Total Phosphorous") +
+  geom_smooth(method = lm, color="black", se=FALSE) +
+  labs(x = "Phosphate (ug/L)", y = "Total Phosphorous (ug/L)") +
   xlim(0,30) +
   ylim(0,100)
 print(TPvPO4)
@@ -114,8 +111,10 @@ present and that graph axes are aligned.
 Tip: R has a build in variable called `month.abb` that returns a list of months;
 see <https://r-lang.com/month-abb-in-r-with-example>
 
-```{r}
-#5(a) Temperature vs month boxplot. 
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), warning=FALSE}
+#5(a) Temperature vs month boxplot. Reading months as factors. setting limits 
+#for y axis, and ensuring all months for x axis shows even without data in 
+#some months
 Temp.monthplot <- 
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = temperature_C, color=lakename)) +
   geom_boxplot() + 
@@ -125,25 +124,27 @@ Temp.monthplot <-
 
 print(Temp.monthplot)
 
-#5(b) 
+#5(b) TP vs month boxplot
 TP.monthplot <- 
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tp_ug, color=lakename)) +
   geom_boxplot() + 
   ylim(0,160) +
   scale_x_discrete(drop=FALSE) +
-  labs(x="Month", y="Total Phosphorous (ug)", color="Lake Name")
+  labs(x="Month", y="Total Phosphorous (ug/L)", color="Lake Name")
 
 print(TP.monthplot)
 
-#5(c)
+#5(c) TN vs month boxplot
 TN.monthplot <- 
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tn_ug, color=lakename)) +
   geom_boxplot() + 
   ylim(0,3500) +
   scale_x_discrete(drop=FALSE) +
-  labs(x="Month", y="Total Nitrogen (ug)", color="Lake Name")
+  labs(x="Month", y="Total Nitrogen (ug/L)", color="Lake Name")
 
 print(TN.monthplot)
+```
+```{r fig2, fig.height = 8, fig.width = 8, fig.align = "center", warning=FALSE}
 
 #5(d) creating all 3 plots without legends
 Temp.monthplot.NL <- 
@@ -156,8 +157,7 @@ TN.monthplot.NL <-
   TN.monthplot + theme(legend.position = "none")
 
 #combining all 3 plots with no legend and assigning them to a new object
-combinedplots <- plot_grid(Temp.monthplot.NL, TP.monthplot.NL, TN.monthplot.NL, nrow=1, align= 'h', rel_heights=c(1.25,1))
-print(combinedplots)
+combinedplots <- plot_grid(Temp.monthplot.NL, TP.monthplot.NL, TN.monthplot.NL, nrow=3, align= 'h', rel_heights=c(1.25,1))
 
 #extracting the legend from original temperature plot (with legend)
 legend <- get_legend(
@@ -165,7 +165,7 @@ legend <- get_legend(
     guides(color = guide_legend(nrow=1))
 )
 #cowplot combining all 3 plots with one single legend 
-plot_grid(combinedplots, legend,ncol=1,rel_heights = c(1, 0.1))
+plot_grid(combinedplots, legend, ncol=1, rel_heights = c(1, 0.1))
 
 ```
 
@@ -183,28 +183,32 @@ of each land use)
 7. [Niwot Ridge] Now, plot the same plot but with NLCD classes separated into 
 three facets rather than separated by color. 
 
-```{r}
-#6
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+#6 Drymass of needle dataset vs date, with NLCD classes separated by colour
+#x axis ticks are in 6 month intervals
 NeedleDryMass.Date <- 
   ggplot(subset(NiwotRidge, functionalGroup == "Needles"),
          aes(x=collectDate, y=dryMass, color=nlcdClass)) +
   geom_point() +
-  labs(x="Collection Date", y="Dry Mass (g)", color="NLCD Class")
+  scale_x_date(date_breaks = '6 months', date_labels='%b-%Y') +
+  labs(x="Collection Date", y="Dry Mass (g)", color="NLCD Class") 
                 
 print(NeedleDryMass.Date)
 
 
-#7 
+#7 same plot separated by facets 
 NeedleDryMass.Date.Faceted <-
   ggplot(subset(NiwotRidge, functionalGroup == "Needles"),
          aes(x=collectDate, y=dryMass)) +
   geom_point() +
   labs(x="Collection Date", y="Dry Mass (g)", color="NLCD Class") +
-  facet_wrap(vars(nlcdClass), nrow = 3)
+  scale_x_date(date_breaks = '6 months', date_labels='%b-%Y') +
+  labs(x="Collection Date", y="Dry Mass (g)", color="NLCD Class") + 
+  facet_wrap(vars(nlcdClass), nrow = 3) 
 
 print(NeedleDryMass.Date.Faceted)
 
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer: 6 is more effective. While we are able to see the dry mass ranges for each NLCD class more clearly on plot 7, for comparison between dry weights of the different classes, plot 6 is more effective as the data points are all on the same axis. 
+> Answer: 7 is more effective. We are better able to see the range of values for the dry mass of needle litter data for each NLCD site as compared to plot 6 where the points are clustered together on one axis.  

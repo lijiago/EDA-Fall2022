@@ -120,15 +120,46 @@ What other variables can we add to improve model?
 
 #Exercise 4: Build correlation plots and identify more possible explanatory variables to add to the regression.
 
+library(corrplot)
 
+#model answer. as long as numeric, can include them as explanatory variables
+EPAAir.variables2 <-
+  EPAair %>%
+  select(meanLAT:Ozone) %>%
+  na.omit()
 
+EPAairCorr2 <- cor(EPAAir.variables2) #create a matrix that has correlation between each one of the columns with each other. symmetric matrix. 
+#these are more visual representations of the matrix. orange to reds are negative correlations, blues are positive correlations
+corrplot(EPAairCorr2, method ="ellipse")
+corrplot.mixed(EPAairCorr2, upper="ellipse")
 
 #Exercise 5: Choose a model by AIC in a Stepwise Algorithm. Do the results from AIC match the variables you selected on Exercise 5?
 
 
+# running linear model with all the variables
+ozonebyall.regression <- lm(data=EPAAir.variables2, PM2.5 ~ Ozone + Year + Month + meanLONG + meanLAT)
+summary(ozonebyall.regression)
+#rsquare is 0.192 -> explaining variability than pm2.5 that just ozone. 
+#p values can tell us assumptions. p value for ozone is v small, so highly correlated with pm2.5. year, greater than 0.05, reject null, no significant correlation. month has low p value, significant correlations with pm2.5. similar to corrplot
+
+step(ozonebyall.regression)
+
+
+#my answer
+EPAairAIC <- lm(data=EPAAir.variables2, PM2.5 ~ meanLAT + meanLONG +Year + Month + Ozone )
+
+step(EPAairAIC)
+
+summary(EPAairAIC)
 
 
 #Exercise 6: Run another regression using the variables selected on Exercise 6. Compare r-squared value with the one from Exercise 5. 
+
+Ozonebestregression <- lm(data=EPAAir.variables2, PM2.5 ~ meanLAT + meanLONG+ Month + Ozone)
+summary (Ozonebestregression)
+
+#all pvalue <0.05, r2: 0.191 -> better than earlier 
+
 
 ```
 
@@ -167,5 +198,12 @@ print(Litter.Totals.plot)
 ```
 
 ```{r}
-#Exercise 7: Improve the plot```
+#Exercise 7: Improve the plot to print all the As together, all the bs together etc 
+
+#arrange by treatgroups
+
+
+
+
+```
 

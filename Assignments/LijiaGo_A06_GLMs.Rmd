@@ -80,7 +80,7 @@ NTL.processed <-
   filter(samplemonth == "07") %>%
   select(lakename, year4, daynum, depth, temperature_C) %>%
   na.omit()
-
+ 
 #5
 TempvDepth <- 
   ggplot(NTL.processed, aes(x=depth, y=temperature_C)) +
@@ -131,22 +131,17 @@ Let's tackle a similar question from a different approach. Here, we want to expl
 Temp.AIC <- lm(data = NTL.processed, temperature_C ~ year4 + daynum + depth)
 
 step(Temp.AIC)
-#why stepwise doesnt go step by step? 
-
-Temp.model <- lm(data = NTL.processed, temperature_C ~ year4 + daynum + depth)
-summary(Temp.model)
-
 
 #10
+Temp.model.recommended <- lm(data=NTL.processed, temperature_C ~ year4 + daynum + depth)
+summary(Temp.model.recommended)
 
 
 ```
 
 11. What is the final set of explanatory variables that the AIC method suggests we use to predict temperature in our multiple regression? How much of the observed variance does this model explain? Is this an improvement over the model using only depth as the explanatory variable?
 
-> Answer: 
-
-
+> Answer: The AIC method suggests we use the year, day number and depth to predict temperature in our multiple regression. The r-squared value for the new model is 0.741, meaning that 74% of the observed variance can be explained by this model. This is a very slight improvement from the r-squared value of the model only using depth which had an r-squared value of 0.739. 
 
 ---
 ## Analysis of Variance
@@ -167,8 +162,7 @@ summary(NTL.anova.lm)
 
 13. Is there a significant difference in mean temperature among the lakes? Report your findings. 
 
-> Answer: 
-
+> Answer: There is significant difference in mean temperatures among the lakes. This is because the p-value is less than 0.05, and therefore we reject the null hypothesis which states that the mean temperature among lakes are the same. 
 
 
 14. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
@@ -177,7 +171,7 @@ summary(NTL.anova.lm)
 #14.
 TempvDepth.lake <- 
   ggplot(NTL.processed, aes(x=depth, y=temperature_C, color=lakename)) +
-  geom_point() +
+  geom_point(alpha=0.5) +
   geom_smooth(method=lm, se=FALSE) +
   ylim(0, 35) +
   labs(x="Depth (m)", y="Temperature(°C)")
@@ -192,24 +186,34 @@ print(TempvDepth.lake)
 #15
 TukeyHSD(NTL.anova)
 
+#extracting groupings for pairwise relationships
+NTL.groups <- HSD.test(NTL.anova, "lakename", group = TRUE)
+NTL.groups
+
 ```
 
 16.From the findings above, which lakes have the same mean temperature, statistically speaking, as Peter Lake? Does any lake have a mean temperature that is statistically distinct from all the other lakes?
 
->Answer: Lakes that have the same mean temperature statistically to Peter Lake are Central Long Lake, Crampton Lake, East Long Lake and Hummingbird Lake, as the lakes in these pairings all have p values < 0.05. 
+>Answer: Lakes that have the same mean temperature statistically to Peter Lake are Central Long Lake, Crampton Lake, East Long Lake and Hummingbird Lake, as the lakes in these pairings all have p values < 0.05. From the pairwise groups, we can tell that there are no lakes that have a mean temperature that is statistically distinct from all other lakes. 
 
- 
 
 17. If we were just looking at Peter Lake and Paul Lake. What's another test we might explore to see whether they have distinct mean temperatures? 
 
->Answer: 
-
+>Answer: We could use a two-sample t-test to see if the different lakes have distinct mean temperatures. 
 
 
 18. Wrangle the July data to include only records for Crampton Lake and Ward Lake. Run the two-sample T-test on these data to determine whether their July temperature are same or different. What does the test say? Are the mean temperatures for the lakes equal? Does that match you answer for part 16?
 
 ```{r t.test}
+#wrangling July data to include only records for Crampton Lake and Ward Lake
+CramptonWardLake <- 
+  NTL.processed %>% 
+  filter(lakename %in% c("Crampton Lake", "Ward Lake"))
 
+CramptonWard.twosample <- t.test(CramptonWardLake$temperature_C ~ CramptonWardLake$lakename)
+CramptonWard.twosample
+
+  
 ```
 
->Answer: 
+>Answer: The p value is 0.2649 > 0.05, which means the results are insignificant. This matches the result from part 16, where we find that the Ward Lake-Crampton Lake pair has a p value of 0.999, meaning that we fail to reject the null and did not find that the mean temperatures for the lakes are equal. 

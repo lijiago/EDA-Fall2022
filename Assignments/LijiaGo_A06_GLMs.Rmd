@@ -11,7 +11,8 @@ editor_options:
 #This code chunk will tidy your knit PDF files, wrapping long code lines
 #For it to work, the "formatR" package needs to be installed
 
-#install.packages('formatR')
+install.packages('formatR')
+library(formatR)
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80), tidy=TRUE)
 ```
 
@@ -32,7 +33,7 @@ This exercise accompanies the lessons in Environmental Data Analytics on general
 
 2. Build a ggplot theme and set it as your default theme.
 
-```{r setup}
+```{r, message=FALSE}
 #1
 #set up working directory
 setwd("/home/guest/R/EDA-Fall2022/")
@@ -49,7 +50,7 @@ NTL <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv",
 #2
 mytheme <- theme_classic(base_size = 14) +
   theme(axis.text = element_text(color = "black"), 
-        legend.position = "top")
+        legend.position = "right")
 theme_set(mytheme)
 
 ```
@@ -69,7 +70,7 @@ Ha: There is a relationship between mean lake temperature and depth across all l
 
 5. Visualize the relationship among the two continuous variables with a scatter plot of temperature by depth. Add a smoothed line showing the linear model, and limit temperature values from 0 to 35 °C. Make this plot look pretty and easy to read.
 
-```{r scatterplot}
+```{r scatterplot, tidy.opts=list(width.cutoff=40), tidy=TRUE, warning=FALSE, message=FALSE}
 #4
 #convert functions to date for sampledate column
 NTL$sampledate <- as.Date(NTL$sampledate, format = "%m/%d/%y")
@@ -84,10 +85,10 @@ NTL.processed <-
 #5
 TempvDepth <- 
   ggplot(NTL.processed, aes(x=depth, y=temperature_C)) +
-  geom_point() +
-  geom_smooth(method=lm, color="black", se=FALSE) +
+  geom_point(alpha=1/10) +
+  geom_smooth(method=lm, color="red", se=FALSE) +
   ylim(0, 35) +
-  labs(x="Depth (m)", y="Temperature(°C)")
+  labs(x="Depth (m)", y="Temperature (°C)")
 
 print(TempvDepth)
 ```
@@ -95,25 +96,23 @@ print(TempvDepth)
 
 6. Interpret the figure. What does it suggest with regards to the response of temperature to depth? Do the distribution of points suggest about anything about the linearity of this trend?
 
-> Answer: 
-
+> Answer: The scatter plot suggests that temperature and depth have a negative relationship (i.e. temperature decreases with increasing depth). The points seem to be unevenly distribute, with more points concentrated at depth 0-5m, with lesser points as the depth increases past 5m. This could contribute to sampling bias even though the points still follow a linear trend.
 
 7. Perform a linear regression to test the relationship and display the results
 
 ```{r linear.regression}
-#7 
+#7 correlation and linear regression 
 cor.test(NTL.processed$temperature_C, NTL.processed$depth)
 
 LinearRegression <- lm(data=NTL.processed, temperature_C ~ depth)
 summary(LinearRegression)
-
 
 ```
 
 
 8. Interpret your model results in words. Include how much of the variability in temperature is explained by changes in depth, the degrees of freedom on which this finding is based, and the statistical significance of the result. Also mention how much temperature is predicted to change for every 1m change in depth. 
 
-> Answer: The results of the correlation test (-0.859) tell us that temperature and depth are negatively correlated to a large extent. Since the p-value is less than 0.05, the coefficients are statistically different from 0, meaning that we reject the null hpothesis and accept that alternative hypothesis that there is a relationship between mean temperature and lake depth across all lakes in the month of July. Depth explains 73.9% of the variability in temperature, and this is based on 9726 degrees of freedom. For a 1m change in depth, there is a 1.95°C decrease in lake temperature. 
+> Answer: The results of the correlation test (-0.859) tell us that temperature and depth are negatively correlated to a large extent. Since the p-value is less than 0.05, the coefficients are statistically different from 0, meaning that we reject the null hypothesis and accept the alternative hypothesis that there is a relationship between mean temperature and lake depth across all lakes in the month of July. Depth explains 73.9% (r-squared value) of the variability in temperature, and this is based on 9726 degrees of freedom. For a 1m change in depth, there is a 1.95°C decrease in lake temperature. 
 
 ---
 
@@ -162,19 +161,19 @@ summary(NTL.anova.lm)
 
 13. Is there a significant difference in mean temperature among the lakes? Report your findings. 
 
-> Answer: There is significant difference in mean temperatures among the lakes. This is because the p-value is less than 0.05, and therefore we reject the null hypothesis which states that the mean temperature among lakes are the same. 
+> Answer: There is significant difference in mean temperatures among the lakes. This is because the p-value is less than 0.05, and therefore we reject the null hypothesis which states that there is no difference among group means. 
 
 
 14. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
-```{r scatterplot.2}
+```{r scatterplot.2, warning=FALSE, message=FALSE}
 #14.
 TempvDepth.lake <- 
   ggplot(NTL.processed, aes(x=depth, y=temperature_C, color=lakename)) +
   geom_point(alpha=0.5) +
   geom_smooth(method=lm, se=FALSE) +
   ylim(0, 35) +
-  labs(x="Depth (m)", y="Temperature(°C)")
+  labs(x="Depth (m)", y="Temperature(°C)", color="Lake Name")
 
 print(TempvDepth.lake)
 
@@ -190,11 +189,12 @@ TukeyHSD(NTL.anova)
 NTL.groups <- HSD.test(NTL.anova, "lakename", group = TRUE)
 NTL.groups
 
+
 ```
 
 16.From the findings above, which lakes have the same mean temperature, statistically speaking, as Peter Lake? Does any lake have a mean temperature that is statistically distinct from all the other lakes?
 
->Answer: Lakes that have the same mean temperature statistically to Peter Lake are Central Long Lake, Crampton Lake, East Long Lake and Hummingbird Lake, as the lakes in these pairings all have p values < 0.05. From the pairwise groups, we can tell that there are no lakes that have a mean temperature that is statistically distinct from all other lakes. 
+>Answer: Paul lake and Ward Lake have the same mean temperature statistically. There are no lakes that have a mean temperature statistically distinct from all other lakes.
 
 
 17. If we were just looking at Peter Lake and Paul Lake. What's another test we might explore to see whether they have distinct mean temperatures? 
@@ -216,4 +216,4 @@ CramptonWard.twosample
   
 ```
 
->Answer: The p value is 0.2649 > 0.05, which means the results are insignificant. This matches the result from part 16, where we find that the Ward Lake-Crampton Lake pair has a p value of 0.999, meaning that we fail to reject the null and did not find that the mean temperatures for the lakes are equal. 
+>Answer: The p value is 0.2649 > 0.05, which means we accept the null hypothesis that the means are statistically equal. This matches the result from part 16, where we found that the Ward and Crampton Lake pair have equal mean temperatures. 

@@ -113,7 +113,7 @@ TukeyHSD(Litter.Totals.anova) #outputs for each possible combination, the differ
 # Extract groupings for pairwise relationships
 Litter.Totals.groups <- HSD.test(Litter.Totals.anova, "plotID", group = TRUE) #HSD.test(anova item, category, group=True so function will group levels have the same mean)
 Litter.Totals.groups
-#treatments with same letter are not significantly different
+#treatments with same letter are not significantly different, ie they all have the same mean
 
 # Graph the results. site 40=abc, site 41=ab, site 46=abcd -> follow the order of the sites
 Litter.Totals.plot <- ggplot(Litter.Totals, aes(x = plotID, y = dryMass)) +

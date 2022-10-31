@@ -22,9 +22,9 @@ Today we will work with two datasets. The USGS dataset on discharge at the Eno R
 library(tidyverse)
 library(lubridate)
 #install.packages("trend")
-library(trend)
+library(trend) # to run stationary test
 #install.packages("zoo")
-library(zoo)
+library(zoo) #to replace missing data
 #install.packages("Kendall")
 library(Kendall)
 #install.packages("tseries")
@@ -36,12 +36,12 @@ mytheme <- theme_classic(base_size = 14) +
         legend.position = "top")
 theme_set(mytheme)
 
-#Read Eno river data
+#Read Eno river data - daily time steps
 EnoDischarge <- read.csv("./Data/Processed/USGS_Site02085000_Flow_Processed.csv",
                          stringsAsFactors = TRUE)
 EnoDischarge$datetime <- as.Date(EnoDischarge$datetime, format = "%Y-%m-%d")
 
-#Read wind speed data
+#Read wind speed data - monthly time steps
 wind_data <- read.csv(file="./Data/Raw/Wind_Speed_PortArthurTX.csv",header=TRUE,
                       stringsAsFactors = TRUE)
 wind_data$DATE <- ym(wind_data$DATE)
@@ -65,10 +65,30 @@ Analysis of time series presents several opportunities. For environmental data, 
 Time series datasets come with several caveats, which need to be addressed in order to effectively model the system. A few common challenges that arise (and can occur together within a single dataset) are: 
 
 * **Autocorrelation**: Data points are not independent from one another (i.e., the measurement at a given time point is dependent on previous time point(s))
-* **Data gaps**: Data are not collected at regular intervals, necessitating *interpolation* between measurements.
-* **Seasonality**: seasonal patterns in variables occur at regular intervals, impeding clear interpretation of a monotonic (unidirectional) trend.
-* **Heteroscedasticity**: The variance of the time series is not constant over time
+
+autocovariance and autocorrelation function gives information about the dependence structure of a time series, covariance at lag1 is significant, means that my observation t is dependent on observation t-1 (model for timeseries would need to have info about observation at t-1)
+
+* **Data gaps**: Data are not collected at regular intervals, necessitating *interpolation* between measurements. huge challenge. can interpolate for short gaps but if gaps are long, can split datasets in 2
+* **Seasonality**: seasonal patterns in variables occur at regular intervals, impeding clear interpretation of a monotonic (unidirectional) trend. -> behaviour that repeats itself in short intervals. can tell from ACF plots
+* **Heteroscedasticity**: The variance of the time series is not constant over time. 
 * **Covariance**: the covariance of the time series is not constant over time
+
+Stationary process: probability laws that govern behaviour of the process do not change over time. distribution of red and black dots same (slides). statistics ie mean, SD, autocorrelation do not change over time
+
+Linear trend estimation, de-trend to remove trend because we want to monitor the stationary dataset (dataset with same mean overtime)
+for each observation of Y subtract the estimated trend. (this is the error) creates series of random terms with no trend of increase or decrease over time
+can do the same for non-linear trend (polynomial). for exponential, take log to get a linear trend
+
+Seasonal trend estimation using a **seasonal means model**: same process, can detrend as well 
+
+Series with **Deterministic Trend**: detrending is accomplished by running a regression and obtaining the series of residuals, and the residuals will give the detrended series. That' what is called trend-stationarity (can have constant trend over time or stochastic trend)
+
+**stochastic trend**: trend that changes over time. cannot be removed by processes of deterministic trend. may have to subtract the series more than once
+
+**Stationary tests**: monotonic trend (Mann-Kendall/Spearman's Rank Correlation) or unit root (Dickey-Fuller)
+Mann-kendall cannot run seasonal data, but R can do it. 
+Spearman's: relationship does not need to be linear. can be linear or non-linear. 
+Dick-Fuller: applied to verify a stochastic trend (or a series with a unit root). phi=1 (contain unit root) or phi <1 series goes back to mean and it means you are dealing with a stationary process. to remove unit root, need to differentiate the series. 
 
 ## Handling data gaps and missing data. Example: Eno River Discharge
 
@@ -77,6 +97,7 @@ River discharge is measured daily at the Eno River gage station. Since we are wo
 Let's look at what the dataset contains for mean daily discharge.
 
 ```{r}
+#plot variable over time
 ggplot(EnoDischarge, aes(x = datetime, y = discharge.mean)) +
   geom_line() +
   labs(x = "", y = expression("Discharge (ft"^3*"/s)"))
@@ -90,6 +111,7 @@ Let's start by removing the NAs and splitting the dataset into the early and lat
 EnoDischarge.complete <- EnoDischarge %>%
   drop_na(discharge.mean)
 
+#splitting datasets into 2
 EnoDischarge.early <- EnoDischarge.complete %>%
   filter(datetime < as.Date("1985-01-01"))
 
@@ -102,8 +124,8 @@ EnoDischarge.late <- EnoDischarge.complete %>%
 A given time series can be made up of several component series: 
 
 1. A **seasonal** component, which repeats over a fixed known period (e.g., seasons of the year, months, days of the week, hour of the day)
-2. A **trend** component, which quantifies the upward or downward progression over time. The trend component of a time series does not have to be monotonic.
-3. An **error** or **random** component, which makes up the remainder of the time series after other components have been accounted for. This component reflects the noise in the dataset. 
+2. A **trend** component, which quantifies the upward or downward progression over time. The trend component of a time series does not have to be monotonic. can be stochastic trend that changes overtime. 
+3. An **error** or **random** component, which makes up the remainder of the time series after other components have been accounted for. This component reflects the noise in the dataset. part of time series that cannot be explained by trend/season
 4. (optional) A **cyclical** component, which repeats over periods greater than the seasonal component. A good example of this is El Niño Southern Oscillation (ENSO) cycles, which occur over a period of 2-8 years.
 
 ### Example: Eno discharge
@@ -115,22 +137,30 @@ We first need to turn the discharge data into a time series object in R. This is
 Note: time series objects must be equispaced. In our case, we have daily data with no NAs in the data frame, so we don't need to worry about this. We will cover how to address data that are not equispaced later in the lesson.
 
 ```{r}
+#for time series analysis, we dont use dataframes, but transform the data into a time series object
 EnoDischarge.late_ts <- ts(EnoDischarge.late$discharge.mean, start = c(1985,1), frequency = 365)
+#starting point is 1st observation. frequency: 365 means day of the year
+head(EnoDischarge.late_ts) #check observations of new object
 ```
 
 The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
 
 ```{r}
-?stl
+?stl #help stl. run decomposition for each variable separately. 
+#as.window () defines seasonal window. 
 # Generate the decomposition
 EnoDischarge.late_Decomposed <- stl(EnoDischarge.late_ts, s.window = "periodic")
 
-# Visualize the decomposed series. 
+# Visualize the decomposed series. visualise decomposition. seasonal component repeats itself every 365 days. trend is not monotonic. 
 plot(EnoDischarge.late_Decomposed)
 
 # We can extract the components and turn them into data frames
+#plot these components over time
 EnoDischarge.late_Components <- as.data.frame(EnoDischarge.late_Decomposed$time.series[,1:3])
+#time series object EnoDischarge.late_Decomposed has 3 components, seasonal, trend and remainder
 
+
+#adding 2 more components with observed data and date information
 EnoDischarge.late_Components <- mutate(EnoDischarge.late_Components,
         Observed = EnoDischarge.late$discharge.mean,     
         Date = EnoDischarge.late$datetime)
@@ -141,6 +171,7 @@ ggplot(EnoDischarge.late_Components) +
   geom_line(aes(y = trend, x = Date), color = "#c13d75ff") +
   geom_hline(yintercept = 0, lty = 2) +
   ylab(expression("Discharge (ft"^3*"/s)"))
+#observed data never goes below the dotted line, but the trend and observed data may go below the line at some distance
 
 # Visualize how the seasonal cycle maps onto the data
 ggplot(EnoDischarge.late_Components) +
@@ -149,6 +180,7 @@ ggplot(EnoDischarge.late_Components) +
   geom_hline(yintercept = 0, lty = 2) +
   ylab(expression("Discharge (ft"^3*"/s)"))
 
+#clearly going below y=0 line at some areas
 ```
 
 Note that the decomposition can yield negative values when we apply a seasonal adjustment or a trend adjustment to the data. The decomposition is not constrained by a lower bound of zero as discharge is in real life. Make sure to interpret with caution!
@@ -158,7 +190,7 @@ Note that the decomposition can yield negative values when we apply a seasonal a
 
 Two types of trends may be present in our time series dataset: **monotonic/deterministic** or **stochastic**. Monotonic trends are a gradual shift over time that is consistent in direction, for example in response to land use change. 
 
-A third type of trend we haven't talked about is the **step** trend, also knows as a level shift. Step trends are a distinct shift at a given time point, for example in response to a policy being enacted. 
+A third type of trend we haven't talked about is the **step** trend, also knows as a level shift. Step trends are a distinct shift at a given time point, for example in response to a policy being enacted. Complete shifts over a time period.
 
 
 ### Monotonic trend analysis
@@ -177,6 +209,7 @@ The Eno River discharge data doesn't have any short periods of missing data, so 
 
 
 ```{r}
+#wind data is only missing one observation (see summary for NAs)
 head(wind_data)
 summary(wind_data$AWND)
 
@@ -184,24 +217,29 @@ summary(wind_data$AWND)
 # In real applications you will simply replace NAs
 wind_data_clean <- 
   wind_data %>% 
-  mutate( AWND.clean = zoo::na.approx(AWND) )
+  mutate( AWND.clean = zoo::na.approx(AWND) ) #add new column AWND.clean (na.approx to interpolate)
+#functions that has the same name but from different package can use this (packagename::functionname)
 
 summary(wind_data_clean$AWND.clean)
 #Note the NA is gone
+#interpolation doesnt change statistics of the dataset 
 
 ggplot(wind_data_clean ) +
   geom_line(aes(x = DATE, y = AWND.clean), color = "red") +
   geom_line(aes(x = DATE, y = AWND), color = "black") +
   ylab("Average Wind Speed") 
+#missing dataset fixed by the red line
+
+#if NAs are in the beginning and end of dataset then we can use na.omit or drop_na. but if the NAs are in the middle of the dataset cannot use them, must use na.approx
 ```
 
 ### Monotonic trend analysis, continued
 
 Specific tests for monotonic trend analysis are listed below, with assumptions and tips: 
 
-* **linear regression**: no seasonality, fits the assumptions of a parametric test. Function: `lm`
-* **Mann-Kendall**: no seasonality, non-parametric, missing data allowed. Function: `MannKendall()` (package: Kendall)
-* **Seasonal Mann-Kendall**: seasonality, non-parametric `SeasonalMannKendall` (package: Kendall)
+* **linear regression**: no seasonality, fits the assumptions of a parametric test. Function: `lm` (if trend is linear)
+* **Mann-Kendall**: no seasonality, non-parametric, missing data allowed. Function: `MannKendall()` (package: Kendall) (monotonic but not linear)
+* **Seasonal Mann-Kendall**: seasonality, non-parametric `SeasonalMannKendall` (package: Kendall) (monotonic but not linear)
 * **Spearman Rho**: no seasonality, non-parametric, missing data allowed. Function: `cor.test(method="spearman")` (package: stats)
 
 Specific test for stochastic trend analysis:
@@ -225,24 +263,31 @@ wind_data_ts <- ts(wind_data_clean$AWND.clean,
                    start=c(f_year,f_month),
                    frequency=12) 
 
+#function first (define first month and year)
+#freq 12 cos working with monthly data 
+
 #decompose
 wind_data_decomp <- stl(wind_data_ts,s.window = "periodic")
 plot(wind_data_decomp)
 
 # Run SMK test
 wind_data_trend1 <- Kendall::SeasonalMannKendall(wind_data_ts)
+#only SMK can run seasonal mann kendall test
 
 # Inspect results
 wind_data_trend1
 summary(wind_data_trend1)
-
+#p value less than 0.05, reject null, we have a trend 
 
 wind_data_trend2 <- trend::smk.test(wind_data_ts)
 # Inspect results
 wind_data_trend2
 summary(wind_data_trend2)
+# results for each season of the year. 
+#value of S: tendency for decrease for more negative values. seasons 4 and 5 dont have as pronounced decreases as the S value is less negative. p value for both seasons much higher than 0.05, which means those 2 seasons have stationary trends. but overall trend is still decreasing for the entire dataset
 
 #Visualization
+#add linear regression 
 wind_data_plot <-
 ggplot(wind_data, aes(x = DATE, y = AWND)) +
   geom_point() +
@@ -255,14 +300,14 @@ print(wind_data_plot)
 
 What would we conclude based on these findings? 
 
-> Answer:
+> Answer: negative slope showing decreasing trend of ave windspeed over time. as we were able to spot with decomposition and seasonal mann kendall test
 
 
 ## Forecasting with Autoregressive and Moving Average Models (ARMA)
 
 We might be interested in characterizing a time series in order to understand what happened in the past and to effectively forecast into the future. Two common models that can approximate time series are **autoregressive** and **moving average** models. To classify these models, we use the  **ACF (autocorrelation function)** and the **PACF (partial autocorrelation function)**, which correspond to the autocorrelation of a series and the correlation of the residuals, respectively. 
 
-**Autoregressive** models operate under the framework that a given measurements is correlated with  previous measurements. For example, an AR1 formulation dictates that a measurement is dependent on the previous measurement, and the value can be predicted by quantifying the lag. 
+**Autoregressive** models operate under the framework that a given measurements is correlated with  previous measurements. For example, an AR1 formulation dictates that a measurement is dependent on the previous measurement, and the value can be predicted by quantifying the lag. Related to autocorrelation and partial autocorrelation. 
 
 **Moving average** models operate under the framework that the covariance between a measurement and the previous measurement is zero. While AR models use past forecast *values* to predict future values, MA models use past forecast *errors* to predict future values.
 

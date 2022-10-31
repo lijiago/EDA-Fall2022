@@ -147,7 +147,7 @@ The `stl` function decomposes the time series object into its component parts. W
 
 ```{r}
 ?stl #help stl. run decomposition for each variable separately. 
-#as.window () defines seasonal window. 
+#s.window () defines seasonal window. 
 # Generate the decomposition
 EnoDischarge.late_Decomposed <- stl(EnoDischarge.late_ts, s.window = "periodic")
 

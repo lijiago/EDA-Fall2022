@@ -19,7 +19,7 @@ getwd()
 library(tidyverse)
 library(lubridate)
 
-install.packages("rvest")
+#install.packages("rvest")
 library(rvest)
 
 # Set theme
@@ -63,7 +63,8 @@ To begin, we'll fetch the contents of the web site into our coding environment u
 ```{r fetch.the.web.resource}
 #Fetch the web resources from the URL
 webpage <- read_html('https://www.ncwater.org/WUDC/app/WWATR/report/view/0004-0001/2020')
-webpage
+webpage 
+#html made up of tags and values. 
 ```
 
 ### Understanding web pages from a coding standpoint
@@ -72,7 +73,7 @@ The `read_html()` function returns a list of the two elements, <head> and <body>
  * The <body> mostly contains the content that is displayed in your browser.
  
 EXERCISE: Open the source of the web page in your browser (<ctrl>-<u>).
-* Do you see the <head> and <body> sections?
+* Do you see the <head> and <body> sections? 
 * Do you see where it states the registrant? ("American & Efird, Inc.")
 
 HTML files follow a syntax of **tags** (what falls beteween the `<` and `>`) and **values**. Tags can indicate what kind of hyper-text element it is, and they can also include **properties** such as "id" and "class" to which specific **property values** can be assigned. This is important to know at some level, because it's this system of tags, properties, and property values that allow us to target specific elements in a web page so that we can scrape the data we want. You'll also see that items are hierarchical with some items (e.g. <table> containing other items <tr>).
@@ -174,8 +175,8 @@ This begins by setting the parameters of the page we'll be scraping to variables
 #Construct the scraping web address, i.e. its URL
 the_base_url <- 'https://www.ncwater.org/WUDC/app/WWATR/report/view'
 the_facility <- '0004-0001'
-the_year <- 2015
-the_scrape_url <- paste0(the_base_url, '/', the_facility, '/', the_year)
+the_year <- 2014
+the_scrape_url <- paste0(the_base_url, '/', the_facility, '/', the_year) #paste0 eliminates the space when you paste the individual items
 print(the_scrape_url)
 
 #Retrieve the website contents 
@@ -194,19 +195,19 @@ the_facility_type <- the_website %>% html_nodes(the_facility_id_tag) %>% html_te
 the_withdrawals <- the_website %>% html_nodes(the_data_tag) %>% html_text()
 
 #Construct a dataframe from the scraped data
-df_withdrawals <- data.frame("Month" = rep(1:12),
-                             "Year" = rep(the_year,12),
+df_withdrawals <- data.frame("Month" = rep(1:12), #produces a sequence of numbers
+                             "Year" = rep(the_year,12), #12 repeats 
                              "Avg_Withdrawals_mgd" = as.numeric(the_withdrawals)) %>% 
-  mutate(Registrant = !!the_registrant,
+  mutate(Registrant = !!the_registrant, #!! dont set to a string, refers to a variable
          Facility_name = !!the_facility_name,
          Facility_type = !!the_facility_type,
-         Date = my(paste(Month,"-",Year)))
+         Date = my(paste(Month,"-",Year))) #convert month and year to date
 
 #Plot 
 ggplot(df_withdrawals,aes(x=Date,y=Avg_Withdrawals_mgd)) + 
   geom_line() + 
   geom_smooth(method="loess",se=FALSE) +
-  labs(title = paste("2020 Water usage data for",the_registrant),
+  labs(title = paste(the_year,"Water usage data for",the_registrant),
        subtitle = the_facility_name,
        y="Withdrawal (mgd)",
        x="Date")
@@ -221,6 +222,7 @@ We have our code so we can fairly easily scrape any site (if we know its ID) for
 
 ```{r create.our.function}
 #Create our scraping function
+# 2 inputs, the year and facility
 scrape.it <- function(the_year, the_facility){
   
   #Retrieve the website contents 
@@ -249,7 +251,7 @@ scrape.it <- function(the_year, the_facility){
            Date = my(paste(Month,"-",Year)))
   
   #Pause for a moment - scraping etiquette
-  #Sys.sleep(1) #uncomment this if you are doing bulk scraping!
+  #Sys.sleep(1) #uncomment this if you are doing bulk scraping! tells r to wait for 1 second. will be 1 second slower. reason for that is because we will be reiterating. the server might be DNOS attack. bad etiquette. website provider may cut off access. adding a brief 5 seconds can be helpful
   
   #Return the dataframe
   return(df_withdrawals)
@@ -267,25 +269,30 @@ view(the_df)
 R can iterate using either "lapply" or Purrrs' "map" functions. 
 ```{r scrape.multiple.years.of.data}
 #Set the inputs to scrape years 2015 to 2020 for the site "0004-0001"
+#sequence of years
 the_years = rep(2018:2020)
 my_facility = '0004-0001'
 
 #Use lapply to apply the scrape function
+#run scraipe.it for every value in years vector (the_years)
+#repeat scrape it for every value in the_years. but also specify the_facility, being the specific facility. can copy paste 0004-0001 as well 
 the_dfs <- lapply(X = the_years,
                   FUN = scrape.it,
                   the_facility=my_facility)
 
 #OR, use purrr's map function
+#mapping values on function. has nothing to do with geospatial mapping
 the_dfs <- map(the_years,scrape.it,the_facility=my_facility)
 
 #Conflate the returned dataframes into a single dataframe
+#bind_rows in tidyverse version of r_bind
 the_df <- bind_rows(the_dfs)
 
 #Plot, because it's fun and rewarding
 ggplot(the_df,aes(x=Date,y=Avg_Withdrawals_mgd)) + 
   geom_line() + 
   geom_smooth(method="loess",se=FALSE) +
-  labs(title = paste("2020 Water usage data for",the_registrant),
+  labs(title = paste("2020 Water usage data for",the_registrant), #this part is wrong cos plot shows 2018-2020
        subtitle = the_facility_name,
        y="Withdrawal (mgd)",
        x="Date")
@@ -311,7 +318,7 @@ the_main_website <- read_html(the_main_url)
 #Then extract all the nodes associated with this and rather than extracting them 
 the_facility_ids <- the_main_website %>% 
   html_nodes('#content a') %>%    #Extract a list of html nodes taged with "content a"
-  html_attr("href") %>%           #Pull the "href" attribute from the node
+  html_attr("href") %>%           #Pull the "href" attribute from the node (html_attribute) -> you want the attribute associated wth the tag
   str_split("/") %>%              #Split the html address into substrings, separated by "/"
   map_chr(.,9)                    #Extract the 9th item in the above, which is the facility ID
 
@@ -328,13 +335,15 @@ This website gives a nice example of this: <https://dcl-prog.stanford.edu/purrr-
 
 ```{r Scrape.all.2020.data}
 
-#Subset the facilities
+#Subset the facilities (only get 20 random subsample)
 the_facility_ids_subset <-  sample(the_facility_ids,20)
 
 #Create a list of the year we want, the same length as the vector above
+#list of years that match the facility ids
 the_years <- rep.int(2020,length(the_facility_ids_subset))
 
 #"Map" the "scrape.it" function to retrieve data for all these
+#map2 iterates through 2 values. iterates both lists in parallel
 dfs_2020 <- map2(the_years, the_facility_ids_subset, scrape.it) 
 
 #Conflate the returned list of dataframes into a single one
@@ -345,6 +354,11 @@ df_2020 <- bind_rows(dfs_2020)
 ggplot(df_2020,aes(y = Avg_Withdrawals_mgd, x=Facility_type)) +
   geom_boxplot()
 
+ggplot(df_2020, aes(y=Avg_Withdrawals_mgd, x=as.factor(Month))) +
+  geom_boxplot()
+
+ggplot(df_2020, aes(y=Avg_Withdrawals_mgd, x=Facility_name)) +
+  geom_boxplot()
 ```
 
 ## 3.3 Scraping across years and sites.
@@ -353,14 +367,15 @@ To scrape for both years and sites, we need to dig deeper into Purrr's map funct
 
 ```{r}
 #Create a subset of facilities
+#scrape sites and years at the same time
 the_facilities <- sample(the_facility_ids,3)
-the_years = c(2018,2019,2020)
+the_years = c(2018,2019,2020) #if use map2 here, it will pull site 1 2018 data, site 2 2019 data, site 3 2020 data. but we want 3 samples from 3 years. so 9 values in total
 
 #Use the cross2 function to generate a list of unique combos of year and facility ids
 #Then send apply our scrape.it function to grab values into a list of dataframes
-the_df <- cross2(the_years,the_facilities) %>% 
-  map(lift(scrape.it)) %>% 
-  bind_rows()
+the_df <- cross2(the_years,the_facilities) %>%  #cross2 generates a list of list.
+  map(lift(scrape.it)) %>% #lift. applying it repeatedly to scrape.it, lists unique combinations of all that we want. scrapes all 9 combinations
+  bind_rows() #binding with dataframe
 
 #Plot
 ggplot(the_df,aes(x=Date,y=Avg_Withdrawals_mgd,color=Facility_name)) + 

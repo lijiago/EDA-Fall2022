@@ -33,13 +33,15 @@ The completed exercise is due on Friday, Oct7th @ 5:00pm.
 
 ```{r, message=FALSE}
 #set up working directory
-setwd("/home/guest/R/EDA-Fall2022/")
+#setwd("/home/guest/R/EDA-Fall2022/")
 
 #load tidyverse
 library(tidyverse)
 
 #load lubridate
 library(lubridate)
+
+
 
 #load and name EPA O3 NC 2018 dataset, convert strings to factor
 O3_NC2018 <- read.csv("./Data/Raw/EPAair_O3_NC2018_raw.csv", 
@@ -129,16 +131,16 @@ PM25_2019.selectcols$AQS_PARAMETER_DESC <- 'PM2.5'
 
 #6a Saving all 4 processed datasets in Processed folder
 write.csv(O3_NC2018.selectcols, row.names = FALSE, 
-          file ="./Data/Processed/EPAair_O3_NC2018_Processed.csv")
+          file ="./Data/Processed/EPAair_O3_NC2018_Processed1.csv")
 
 write.csv(O3_NC2019.selectcols, row.names = FALSE, 
-          file ="./Data/Processed/EPAair_O3_NC2019_Processed.csv")
+          file ="./Data/Processed/EPAair_O3_NC2019_Processed1.csv")
 
 write.csv(PM25_2018.selectcols, row.names = FALSE, 
-          file ="./Data/Processed/EPAair_PM25_NC2018_Processed.csv")
+          file ="./Data/Processed/EPAair_PM25_NC2018_Processed1.csv")
 
 write.csv(PM25_2019.selectcols, row.names = FALSE, 
-          file ="./Data/Processed/EPAair_PM25_NC2019_Processed.csv")
+          file ="./Data/Processed/EPAair_PM25_NC2019_Processed1.csv")
 ```
 
 ## Combine datasets

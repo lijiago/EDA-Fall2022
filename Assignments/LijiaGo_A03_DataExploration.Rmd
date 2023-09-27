@@ -30,7 +30,7 @@ The completed exercise is due on Sept 30th.
 #set up working directory
 #getwd()
 
-setwd("/home/guest/R/EDA-Fall2022/")
+#setwd("/home/guest/R/EDA-Fall2022/")
 
 #load tidyverse
 library(tidyverse)
@@ -151,6 +151,8 @@ non-numeric values in row 67 where "NR" is displayed instead of a number).
 #generating plot of number of studies per publication year 
 ggplot(Neonics, aes(x = Publication.Year)) +
   geom_freqpoly()
+
+ggplot(Neonics)+geom_freqpoly(aes(x= Publication.Year), bins=50)
 
 ```
 

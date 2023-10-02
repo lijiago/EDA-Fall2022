@@ -31,7 +31,7 @@ library(tidyverse)
 library(ggridges)
 library(viridis)
 library(RColorBrewer)
-library(colormap)
+#library(colormap)
 ```
 
 ## Expression function and Saving plots

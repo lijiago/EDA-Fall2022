@@ -198,7 +198,7 @@ EPA_AirQuality.summary <-
   group_by(Site.Name, Year, Month) %>%
   summarize(meanAQIPM2.5=mean(PM2.5),
             meanAQIO3=mean(Ozone)) %>%
-  drop_na(meanAQIO3, meanAQIPM2.5)
+  drop_na(meanAQIO3)
 
 #13 calling dimensions of new summary dataset
 dim(EPA_AirQuality.summary)

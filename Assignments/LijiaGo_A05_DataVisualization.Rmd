@@ -44,7 +44,7 @@ the processed data file for the Niwot Ridge litter dataset (use the
 #1  
 
 #set up working directory
-setwd("/home/guest/R/EDA-Fall2022/")
+#setwd("/home/guest/R/EDA-Fall2022/")
 
 #load required packages
 library(tidyverse)
@@ -119,8 +119,9 @@ Temp.monthplot <-
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = temperature_C, color=lakename)) +
   geom_boxplot() + 
   ylim(0,30) +
-  scale_x_discrete (drop=FALSE) +
+  scale_x_discrete (labels=month.abb) +
   labs(x="Month", y="Temperature (°C)", color="Lake Name") 
+
 
 print(Temp.monthplot)
 
@@ -129,7 +130,7 @@ TP.monthplot <-
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tp_ug, color=lakename)) +
   geom_boxplot() + 
   ylim(0,160) +
-  scale_x_discrete(drop=FALSE) +
+  scale_x_discrete(labels=month.abb) +
   labs(x="Month", y="Total Phosphorous (ug/L)", color="Lake Name")
 
 print(TP.monthplot)
@@ -139,7 +140,7 @@ TN.monthplot <-
   ggplot(PeterPaul, aes(x=factor(month, levels=c(1:12)), y = tn_ug, color=lakename)) +
   geom_boxplot() + 
   ylim(0,3500) +
-  scale_x_discrete(drop=FALSE) +
+  scale_x_discrete(labels=month.abb) +
   labs(x="Month", y="Total Nitrogen (ug/L)", color="Lake Name")
 
 print(TN.monthplot)

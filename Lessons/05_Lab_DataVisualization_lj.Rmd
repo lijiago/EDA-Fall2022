@@ -79,7 +79,7 @@ surfacetemp_day <-
   ggplot(subset(PeterPaul.chem.nutrients, depth == 0), 
                 aes(x = daynum, y = temperature_C, color=year4)) +
   geom_point() +
-  facet_wrap(vars(lakename), nrow = 2)
+  facet_wrap(vars(lakename))
 
   print(surfacetemp_day)
 
@@ -120,6 +120,7 @@ ex2b <-
   scale_x_date(
     date_breaks = "5 years", date_labels = "%Y")
 print(ex2b)
+ #scale_x_ -> depends on class of the x column
   
 
 ```
@@ -136,7 +137,7 @@ Exercise: Plot relationships between air quality measurements
 
 ex3 <- 
   ggplot(EPAair, aes(x=PM2.5,y=Ozone)) +
-  geom_point(aes(color=meanLat), alpha=0.5) +
+  geom_point(aes(color=meanLAT), alpha=0.5) +
   geom_smooth(method = lm)
 print(ex3)
 
@@ -144,7 +145,7 @@ print(ex3)
 #model answer
 ex3b <- 
   ggplot(EPAair, aes(x=PM2.5,y=Ozone)) +
-  geom_point(aes(color=meanLat), alpha=0.5) +
+  geom_point(aes(color=meanLAT), alpha=0.5) +
   geom_smooth(method = lm, color="red")+
   ylab(expression("O"[3]* "AQI Value"))
 

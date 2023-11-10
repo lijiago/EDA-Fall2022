@@ -100,9 +100,18 @@ mapview(huc8_sf, zcol ="ACRES")
 huc8_sf_UN <- st_read('./Data/Spatial/NCHUC8.shp') %>%
   filter(SUBBASIN=='Upper Neuse')
 
-#Create a map
+huc8_sf_UN_woUN <- st_read('./Data/Spatial/NCHUC8.shp') %>%
+  filter(SUBBASIN!='Upper Neuse')
 
-mapview(huc8_sf, col.regions='orange')+ mapview(huc8_sf_UN, col.regions='purple', alpha.regions=1)
+
+#Create a map
+#install.packages('leaflet.extras2')
+mapview(huc8_sf, col.regions='orange') | mapview(huc8_sf_UN, col.regions='purple', alpha.regions=1) 
+mapview(huc8_sf, col.regions='orange') + mapview(huc8_sf_UN, col.regions='purple', alpha.regions=1, layer.name = 'HUC 8')
+
+#using ggplot
+
+ggplot() + geom_sf(data = huc8_sf, fill= 'orange' ) + geom_sf(data=huc8_sf_UN, fill = 'purple')
 
 
 ```
@@ -166,11 +175,11 @@ On top of projecting any geographic data to adjust for the limitations of the so
 
 ```{r Transform the datasets to other coordinate reference systems}
 #Convert all to UTM Zone 17 (crs = 26917)
-epa_sf_utm <-      st_transform(epa_pm25_sites_sf, crs = 26917)
-counties_sf_utm <- 
-state_sf_utm <-    
-huc8_sf_utm <-     
-huc2_utm <-        
+epa_sf_utm <-      st_transform(epa_pm25_sites_sf, crs = 26917) 
+counties_sf_utm <- st_transform(counties_sf, crs = 26917)
+state_sf_utm <-    st_transform(state_sf,crs = 26917)
+huc8_sf_utm <-     st_transform(huc8_sf, crs = 26917)
+huc2_utm <-        st_transform(huc2_sf, crs = 26917)       
 ```
 
 ## 3.3 Clipping and intersecting data

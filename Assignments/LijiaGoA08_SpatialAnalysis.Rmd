@@ -116,6 +116,7 @@ usgsgage.sf <- usgsgage %>%
 #11. Re-examine the column names
 colnames(usgsgage.sf)
 
+
 ```
 
 12. What new field(s) appear in the sf dataframe created? What field(s), if any, disappeared?
@@ -165,6 +166,7 @@ colnames(siteflow)
 #16. Join the flow data to our NWIS gage location spatial dataframe
 usgsgage.sf.join <- merge (x=usgsgage.sf,
                            y=siteflow,
+                          
                            by.x= "site_no",
                            by.y="site_no")
 
@@ -185,6 +187,19 @@ Now we can examine where the flooding appears most acute by visualizing gage hei
 ```{r}
 #Map the points, sized by gage height
 mapview(counties_sf, col.regions="green")+mapview(usgsgage.sf.join, cex="gage_ht")
+
+ggplot() +
+  geom_sf(
+   data=counties_sf,
+   fill='lightgreen',
+   color='white') + 
+  geom_sf(
+    data=usgsgage.sf.join,
+    aes(color= gage_ht), alpha=0.3) + 
+  labs(
+    size='Gage height'
+  )
+
 
 ```
 
@@ -225,15 +240,15 @@ Now let's zoom into a particular county and examine the gages located there.
 
 ```{r}
 #22 Select the county
-Lancaster.sf <- counties_sf.utm %>%
-  filter(NAME == "Lancaster")
+Dawson.sf <- counties_sf.utm %>%
+  filter(NAME == "Dawson")
 
 #23 Select gages within the selected county
-gages.intersect <- usgsgage.sf.utm[Lancaster.sf,]
+gages.intersect <- usgsgage.sf.utm[Dawson.sf,]
 
 
 #24 Plot
-mapview(counties_sf.utm, col.regions="grey", alpha=0.7) + mapview(Lancaster.sf, alpha=1) + mapview(gages.intersect, col.regions="red", cex=4)
+mapview(counties_sf.utm, col.regions="grey", alpha=0.7) + mapview(Dawson.sf, alpha=1) + mapview(gages.intersect, col.regions="red", cex=4)
 
 
 ```

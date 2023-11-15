@@ -23,10 +23,10 @@ library(viridis)
 #install.packages("rvest")
 library(rvest)
 
-install.packages("dataRetrieval")
+#install.packages("dataRetrieval")
 library(dataRetrieval)
 
-install.packages("tidycensus")
+#install.packages("tidycensus")
 library(tidycensus)
 
 # Set theme
@@ -104,7 +104,8 @@ gage_data <- gage_data %>%
 #Plot
 ggplot(gage_data,aes(x=datetime,y=discharge_cfs)) + 
   geom_line() +
-  labs(x = "Date",y = "Discharge (cfs)")
+  labs(x = "Date",y = "Discharge (cfs)") + 
+  scale_x_date(date_breaks  ="1 day")
 ```
 
 ### Exercise: 

@@ -62,7 +62,7 @@ Indicate this website as the as the URL to be scraped. (In other words, read the
 
 ```{r set.the.scraping.website}
 #2
-DEQ_website <- read_html("https://www.ncwater.org/WUDC/app/LWSP/report.php?pwsid=03-32-010&year=2021")
+DEQ_website <- read_html("https://www.ncwater.org/WUDC/app/LWSP/report.php?pwsid=03-32-010&year=2022")
 
 
 ```
@@ -108,7 +108,7 @@ max.withdrawals.mgd <- DEQ_website %>% html_nodes ('th~ td+ td') %>% html_text
 #creating dataframe and month in order of scrape
 #rearranging month in chronological order
 df_withdrawals <- data.frame("Month" = c(1, 5, 9, 2, 6, 10, 3, 7, 11,4,8,12),
-                             "Year" = rep(2021,12),
+                             "Year" = rep(2022,12),
                              "Max_Withdrawals_mgd" = as.numeric(max.withdrawals.mgd)) %>%
                     mutate(Date=lubridate::my(paste(Month, "-", Year))) %>%
                     dplyr::arrange(Date) 
@@ -119,8 +119,8 @@ ggplot(df_withdrawals, aes(x=Date, y=Max_Withdrawals_mgd)) +
   geom_line(aes()) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b") + 
   ylab("Maximum Withdrawals (mgd)") +
-  xlab("2021") +
-  ggtitle("2021 maximum daily water withdrawals per month, Durham (NC)")
+  xlab("2022") +
+  ggtitle("2022 maximum daily water withdrawals per month, Durham (NC)")
 
 
 ```

@@ -100,9 +100,9 @@ Find a ten-day forecast of temperatures (Fahrenheit) for Durham, North Carolina.
 
 ```{r DataExercise-1a}
 
-a <- c(55, 56, 58,60,61,63,63,64,64,63)
-b <- c(81,83,83,84,78,71,79,82,85,84)
-
+low <- c(55, 56, 58,60,61,63,63,64,64,63)
+high <- c(81,83,83,84,78,71,79,82,85,84)
+dataframe_temp <- data.frame(low, high)
 
 
 

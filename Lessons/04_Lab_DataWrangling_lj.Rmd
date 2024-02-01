@@ -71,8 +71,10 @@ NTL.phys.data.year <- filter(NTL.phys.data, year4 == 1999)
 
 # Exercise 2: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
-NTL.phys.data.Tues <- filter(NTL.phys.data, lakename == "Tuesday Lake")
-NTL.phys.data.Tues.90thru99 <- filter(NTL.phys.data.Tues & year4>1989 & year4<2000)
+
+ex2 <- filter(NTL.phys.data, lakename == "Tuesday Lake", year4 %in% c(1990:1999))
+
+
 
 NTL.phys.data.90thru99_2 <- 
   NTL.phys.data %>%
@@ -108,6 +110,11 @@ NTL.phys.data.Ex3 <-
   filter(lakename == "Tuesday Lake" & year4>=1990 & year4<=1999 & month(sampledate) == 7)
 
 
+NTL.phys.data.Ex31 <-
+  NTL.phys.data %>%
+  filter(lakename == "Tuesday Lake" & year4 %in% c(1990:1999) & month(sampledate) == 7)
+
+
 #Exercise 4: Using the data from part 3, a pipe and the summarise() function find the mean surface temperature (hints: you will need to add another filter for depth==0). Make sure you eliminate NAs before computing the means
 
 
@@ -115,6 +122,13 @@ NTL.phys.data.July.90thru99.surface <-
   NTL.phys.data.Ex3 %>%
   filter(depth == 0) %>%
   filter(!is.na(temperature_C))%>%
+  summarise(meantemp=mean(temperature_C))
+
+
+NTL.phys.surface <- 
+  NTL.phys.data.Ex3 %>%
+   filter(depth == 0) %>% 
+   drop_na(temperature_C) %>%
   summarise(meantemp=mean(temperature_C))
   
 

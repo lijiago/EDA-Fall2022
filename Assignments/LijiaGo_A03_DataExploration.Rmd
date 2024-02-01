@@ -152,6 +152,9 @@ non-numeric values in row 67 where "NR" is displayed instead of a number).
 ggplot(Neonics, aes(x = Publication.Year)) +
   geom_freqpoly()
 
+
+geo_bar(aes())
+
 ggplot(Neonics)+geom_freqpoly(aes(x= Publication.Year), bins=50)
 
 ```
@@ -241,7 +244,7 @@ dryMass_functionalGroup_boxplot <- ggplot(Litter) +
   geom_boxplot(aes(x = functionalGroup, y=dryMass)) 
 
 #changing font size to 7 so that axis text does not overlap with each other
-dryMass_functionalGroup_boxplot + theme(axis.text = element_text(size = 7))
+dryMass_functionalGroup_boxplot + theme(axis.text = element_text(size = 7)) 
 
 #creating violin plot of dryMass by functionalGroup
 dryMass_functionalGroup_violinplot <- ggplot(Litter) +

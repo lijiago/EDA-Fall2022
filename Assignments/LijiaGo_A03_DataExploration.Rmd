@@ -153,7 +153,7 @@ ggplot(Neonics, aes(x = Publication.Year)) +
   geom_freqpoly()
 
 
-geo_bar(aes())
+
 
 ggplot(Neonics)+geom_freqpoly(aes(x= Publication.Year), bins=50)
 
@@ -230,7 +230,7 @@ number_plotssampled #return a list of unique plotIDs
 ```{r}
 #creating bar graph of functionalGroup counts
 functionalGroup_plot <- ggplot(Litter, aes(x = functionalGroup)) +
-  geom_bar()
+  geom_bar() +geom_text(stat='count', aes(label=..count..), vjust=-1)
 
 #changing font size to 7 so that axis text does not overlap with each other
 functionalGroup_plot + theme(axis.text = element_text(size = 7))  

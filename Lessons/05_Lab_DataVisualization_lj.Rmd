@@ -70,6 +70,19 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 
+unique(PeterPaul.chem.nutrients$month)
+
+
+ggplot(PeterPaul.chem.nutrients, aes(x=month)) + geom_bar() 
+
+PeterPaul.chem.nutrients$month_f <- factor(PeterPaul.chem.nutrients$month, levels=1:12, labels=month.abb)
+  
+ggplot(PeterPaul.chem.nutrients, aes(x=month_f)) + geom_bar() + scale_x_discrete(drop=F)
+       
+
+
+
+
 # 1. 
 # Plot surface temperatures by day of  year. 
 # Color your points by year, and facet by lake in two rows.

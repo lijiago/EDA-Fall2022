@@ -11,7 +11,7 @@ editor_options:
 #This code chunk will tidy your knit PDF files, wrapping long code lines
 #For it to work, the "formatR" package needs to be installed
 
-install.packages('formatR')
+#install.packages('formatR')
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80), tidy=TRUE)
 ```
 
@@ -196,9 +196,24 @@ write.csv(EPA_AirQuality.processed.spread, row.names = FALSE,
 EPA_AirQuality.summary <- 
   EPA_AirQuality.processed.spread %>%
   group_by(Site.Name, Year, Month) %>%
-  summarize(meanAQIPM2.5=mean(PM2.5),
-            meanAQIO3=mean(Ozone)) %>%
-  drop_na(meanAQIO3)
+  summarise(meanAQIPM2.5=mean(PM2.5, na.rm=T),
+            meanAQIO3=mean(Ozone, na.rm=T)) %>%
+  drop_na(meanAQIPM2.5)
+
+#wrong code, need to drop na.rm=T 
+EPA_AirQuality.summary2 <- 
+  EPA_AirQuality.processed.spread %>%
+  group_by(Site.Name, Year, Month) %>%
+  summarise(meanAQIPM2.5=mean(PM2.5, na.rm=T),
+            meanAQIO3=mean(Ozone, na.rm=T)) %>%
+  drop_na(meanAQIPM2.5)
+
+
+
+
+
+
+
 
 #13 calling dimensions of new summary dataset
 dim(EPA_AirQuality.summary)
